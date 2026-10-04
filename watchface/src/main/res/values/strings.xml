@@ -1,3 +1,75 @@
 <resources>
-    <string name="app_name">Sensor Dashboard</string>
+    <string name="app_name">UII</string>
+
+    <!-- Home -->
+    <string name="sos">SOS</string>
+    <string name="bpm">bpm</string>
+    <string name="home_waiting_unit">chờ gửi</string>
+    <string name="fix_permission">Cấp quyền</string>
+    <string name="home_unpaired_title">Ghép nối</string>
+    <string name="home_unpaired_caption">Mã từ web</string>
+    <string name="home_unpaired_start">Bắt đầu</string>
+    <string name="repair_title">Cần ghép lại</string>
+    <string name="repair_button">Ghép nối</string>
+
+    <!-- Details -->
+    <string name="row_heart">Nhịp tim</string>
+    <string name="row_activity">Vận động</string>
+    <string name="row_notifications">Thông báo</string>
+    <string name="row_fall">Té ngã</string>
+    <string name="row_network">Mạng</string>
+    <string name="details_footer">v%1$s · %2$s</string>
+    <string name="details_queue">%1$d chờ gửi</string>
+
+    <!-- SOS -->
+    <string name="sos_header">Báo người thân</string>
+    <string name="sos_pre">Sắp co giật</string>
+    <string name="sos_now">Đang co giật</string>
+    <string name="sos_fall">Bị ngã</string>
+    <string name="cancel">Hủy</string>
+    <string name="sent">Đã gửi</string>
+    <string name="waiting_network">Chờ mạng</string>
+    <string name="done">Xong</string>
+    <string name="delivery_failed">Không gửi được</string>
+
+    <!-- Fall prompt and notifications -->
+    <string name="fall_question">Bạn ổn chứ?</string>
+    <string name="fall_ok">Tôi ổn</string>
+    <string name="fall_notification_title">Phát hiện té ngã</string>
+    <string name="fall_notification_text">Sẽ báo người thân sau %1$d giây</string>
+    <string name="monitoring_notification_title">UII đang theo dõi</string>
+
+    <!-- Pairing -->
+    <string name="pairing_busy">Đang ghép…</string>
+    <string name="pair_need_eight">Cần 8 số</string>
+    <string name="pair_err_wrong">Mã sai</string>
+    <string name="pair_err_rate">Chờ 1 phút</string>
+    <string name="pair_err_devices">Đủ thiết bị</string>
+    <string name="pair_err_network">Không có mạng</string>
+    <string name="pair_err_other">Có lỗi</string>
+
+    <!-- Permissions (short names) -->
+    <string name="perm_heart">nhịp tim</string>
+    <string name="perm_activity">vận động</string>
+    <string name="perm_notifications">thông báo</string>
+
+    <!-- Spoken descriptions -->
+    <string name="cd_status_ok">Đang theo dõi bình thường. Chạm để xem chi tiết.</string>
+    <string name="cd_status_attention">Thiếu quyền %1$s. Chạm để sửa.</string>
+    <string name="cd_status_waiting">%1$d mục đang chờ gửi vì chưa có mạng. Chạm để xem chi tiết.</string>
+    <string name="cd_status_unpaired">Chưa ghép nối đồng hồ.</string>
+    <string name="cd_status_refused">Máy chủ đã gỡ đồng hồ này. Cần ghép nối lại.</string>
+    <string name="cd_heart_rate">Nhịp tim %1$d lần mỗi phút</string>
+    <string name="cd_heart_rate_none">Chưa có nhịp tim</string>
+    <string name="cd_sos">Gọi báo động SOS cho người thân</string>
+    <string name="cd_key_delete">Xóa số cuối</string>
+    <string name="cd_key_ok">Xác nhận mã</string>
+    <string name="cd_code_progress">Đã nhập %1$d trên 8 số</string>
+    <string name="cd_countdown">Còn %1$d giây</string>
+    <string name="cd_cancel">Hủy báo động</string>
+    <string name="cd_sent">Đã gửi cho người thân</string>
+    <string name="cd_delivery_failed">Báo động không gửi được. Hãy gọi người thân ngay.</string>
+    <string name="cd_waiting_sent">Chưa có mạng, sẽ gửi khi có kết nối</string>
+    <string name="cd_row_ok">%1$s: bình thường</string>
+    <string name="cd_row_warn">%1$s: cần chú ý</string>
 </resources>
