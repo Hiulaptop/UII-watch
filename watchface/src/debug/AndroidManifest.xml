@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Debug builds only: lets the emulator reach a web server on the development machine (10.0.2.2).
+        Recent Android blocks apps from private/LAN addresses without this permission.
+        The release build talks to the public https domain and does not declare it.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
+    <application>
+        <!-- Debug builds only: lets `adb shell am broadcast` trigger the fall path for timing tests. -->
+        <receiver
+            android:name=".uii.DebugFallReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="net.studev.uii.DEBUG_FALL" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

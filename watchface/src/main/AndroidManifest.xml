@@ -2,23 +2,62 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-feature android:name="android.hardware.type.watch" />
-    <uses-permission android:name="android.permission.BODY_SENSORS" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+    <!-- Heart rate on Wear OS 5 and older; Wear OS 6 uses READ_HEART_RATE below instead. -->
+    <uses-permission android:name="android.permission.BODY_SENSORS" android:maxSdkVersion="35" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <!-- Health Services checks this for passive monitoring and fall events. -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
     <application
         android:theme="@style/Theme.SensorDashboard"
         android:label="@string/app_name"
         android:allowBackup="false"
+        android:usesCleartextTraffic="${usesCleartextTraffic}"
         android:supportsRtl="true">
         <meta-data
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
+
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.watchtest.ui.UiiActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.example.watchtest.ui.FallPromptActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:taskAffinity="" />
+
+        <!-- Called by Health Services with heart-rate readings and fall events, even when the app is closed. -->
+        <service
+            android:name=".uii.HealthPassiveService"
+            android:exported="true"
+            android:permission="com.google.android.wearable.healthservices.permission.PASSIVE_DATA_BINDING" />
+
+        <service
+            android:name=".uii.MotionService"
+            android:exported="false"
+            android:foregroundServiceType="health" />
+
+        <receiver android:name=".uii.CancelFallReceiver" android:exported="false" />
+        <receiver android:name=".uii.BootReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
