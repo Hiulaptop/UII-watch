@@ -1,12 +1,13 @@
-# Add project specific R8 rules here.
-# AGP will combine all keep rule files in src/main/keepRules to pass to R8
+# R8 rules for the UII watch app. AGP merges every file in src/main/keepRules.
 #
-# For more details, see
-#   https://d.android.com/r/tools/r8/keep-rules
+# Manifest components (activities, services, receivers) are kept automatically, and WorkManager and Compose bring their
+# own consumer rules. What is added here is only what this app relies on by name.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Readable stack traces from release builds.
+-keepattributes SourceFile,LineNumberTable
+
+# Health Services starts this service by the class name registered with it, not from the manifest alone.
+-keep class com.example.watchtest.uii.HealthPassiveService { *; }
+
+# The workers are created by WorkManager from a class name stored in its database.
+-keep class com.example.watchtest.uii.UploadWorker { <init>(...); }

@@ -1,8 +1,19 @@
 [versions]
 agp = "9.4.0"
+# Kotlin that AGP 9.4.0 builds with (kotlin-gradle-plugin 2.2.10); the Compose compiler plugin must match it.
+kotlin = "2.2.10"
+wearCompose = "1.7.0"
+activityCompose = "1.11.0"
+lifecycle = "2.9.4"
 
 [libraries]
+wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "wearCompose" }
+wear-compose-material3 = { module = "androidx.wear.compose:compose-material3", version.ref = "wearCompose" }
+wear-compose-navigation = { module = "androidx.wear.compose:compose-navigation", version.ref = "wearCompose" }
+wear-compose-ui-tooling = { module = "androidx.wear.compose:compose-ui-tooling", version.ref = "wearCompose" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
