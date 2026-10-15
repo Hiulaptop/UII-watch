@@ -24,6 +24,7 @@ object Routes {
     const val SOS = "sos"
     const val COUNTDOWN = "countdown/{kind}"
     const val DELIVERY = "delivery/{id}"
+    const val CARD = "card"
     fun countdown(kind: SosKind) = "countdown/${kind.name}"
     fun delivery(id: String) = "delivery/$id"
 }
@@ -90,7 +91,16 @@ fun UiiApp() {
                     DeliveryScreen(
                         itemId = entry.arguments?.getString("id") ?: "",
                         onDone = { nav.popBackStack(Routes.HOME, inclusive = false) },
+                        onCard = { nav.navigate(Routes.CARD) { popUpTo(Routes.HOME) } },
                     )
+                }
+                composable(Routes.CARD) {
+                    val card = Uii.get(context).sosCard()
+                    if (card != null) {
+                        SosCardScreen(card, onDone = { nav.popBackStack(Routes.HOME, inclusive = false) })
+                    } else {
+                        nav.popBackStack(Routes.HOME, inclusive = false)
+                    }
                 }
             }
         }

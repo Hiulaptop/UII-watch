@@ -39,6 +39,10 @@ public final class Notifications {
 
     /** The wearer can cancel from the notification itself; no activity has to be launched. */
     public static void showFall(Context c, String outboxItemId) {
+        showFall(c, outboxItemId, Payloads.FALL);
+    }
+
+    public static void showFall(Context c, String outboxItemId, String type) {
         ensureChannels(c);
         Intent cancel = new Intent(c, CancelFallReceiver.class).putExtra(CancelFallReceiver.EXTRA_ID, outboxItemId);
         PendingIntent cancelPi = PendingIntent.getBroadcast(c, ID_FALL, cancel, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
@@ -47,14 +51,22 @@ public final class Notifications {
         long seconds = Uii.FALL_CANCEL_WINDOW_MS / 1000;
         Notification n = new Notification.Builder(c, CHANNEL_FALL)
                 .setSmallIcon(android.R.drawable.ic_dialog_alert)
-                .setContentTitle(c.getString(com.example.watchtest.R.string.fall_notification_title))
-                .setContentText(c.getString(com.example.watchtest.R.string.fall_notification_text, (int) seconds))
+                .setContentTitle(c.getString(titleFor(type)))
+                .setContentText(c.getString(Payloads.PRE_SEIZURE.equals(type)
+                        ? com.example.watchtest.R.string.warn_notification_text
+                        : com.example.watchtest.R.string.fall_notification_text, (int) seconds))
                 .setCategory(Notification.CATEGORY_ALARM)
                 .setTimeoutAfter(Uii.FALL_CANCEL_WINDOW_MS)
                 .setContentIntent(openPi)
                 .addAction(new Notification.Action.Builder(null, c.getString(com.example.watchtest.R.string.fall_ok), cancelPi).build())
                 .build();
         notifyIfAllowed(c, ID_FALL, n);
+    }
+
+    private static int titleFor(String type) {
+        if (Payloads.PRE_SEIZURE.equals(type)) return com.example.watchtest.R.string.warn_notification_title;
+        if (Payloads.SEIZURE.equals(type)) return com.example.watchtest.R.string.seizure_notification_title;
+        return com.example.watchtest.R.string.fall_notification_title;
     }
 
     public static void clearFall(Context c) {

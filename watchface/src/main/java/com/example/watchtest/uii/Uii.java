@@ -28,9 +28,12 @@ public final class Uii {
 
     private volatile double lastHr = Double.NaN;
     private volatile long lastHrMs;
+    /** Latest short-window motion features (see {@link MotionFeatures#NAMES}), or null before the first window. */
+    public volatile float[] lastFeatures;
 
     private final Context app;
     private final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
+    private final java.util.concurrent.Executor background = Executors.newSingleThreadExecutor();
 
     private Uii(Context c) {
         app = c.getApplicationContext();
@@ -76,6 +79,38 @@ public final class Uii {
         // The uploader has already dropped the token; remember why, so the wearer is told instead of seeing a silent reset.
         if (r.state == Uploader.State.UNAUTHORIZED) state.setPairingRevoked(true);
         return r;
+    }
+
+    /** The card is re-fetched at most this often unless it is missing, so a profile edit reaches the watch the same day. */
+    private static final long SOS_CARD_STALE_MS = 6 * 60 * 60_000L;
+    /** While there is no card (no profile yet, or the server was unreachable) look again after this long. */
+    private static final long SOS_CARD_RETRY_MS = 10 * 60_000L;
+
+    /** Fetches the SOS card in the background and caches it, so it can be shown with no network after an alert. */
+    public void refreshSosCardAsync() {
+        if (!secrets.isPaired()) return;
+        long now = System.currentTimeMillis();
+        long maxAge = state.sosCardJson().isEmpty() ? SOS_CARD_RETRY_MS : SOS_CARD_STALE_MS;
+        if (now - state.sosCardFetchedMs() < maxAge) return;
+        state.setSosCardFetchedMs(now);   // also throttles retries while the server is unreachable
+        // Not the alert timer: a slow request here must never delay sending an alert.
+        background.execute(() -> {
+            String token = secrets.token();
+            if (token == null) return;
+            ApiResult r = api.getSosCard(token);
+            if (r.outcome != ApiResult.Outcome.OK) return;
+            try {
+                SosCard card = SosCard.fromResponse(r.body);
+                state.setSosCardJson(card == null ? "" : card.toJson());
+            } catch (IllegalArgumentException e) {
+                // An unreadable answer must not wipe a good cached card.
+            }
+        });
+    }
+
+    /** The cached SOS card, or null when the wearer has none (or it has not been fetched yet). */
+    public SosCard sosCard() {
+        return SosCard.fromJson(state.sosCardJson());
     }
 
     public void noteHeartRate(long tMs, double bpm) {

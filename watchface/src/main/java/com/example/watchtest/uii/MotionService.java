@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.util.List;
 
@@ -40,6 +41,8 @@ public final class MotionService extends Service implements SensorEventListener 
     private static final long TICK_MS = 30_000;
 
     private final WindowAggregator aggregator = new WindowAggregator(WINDOW_MS);
+    /** 2 s window, 1 s hop: short enough to see a few seconds of rhythmic shaking, long enough for a 0.5 Hz bin. */
+    private final FeatureWindower windower = new FeatureWindower(2_000, 1_000);
     private SensorManager sensors;
     private HandlerThread thread;
     private Handler handler;
@@ -97,7 +100,23 @@ public final class MotionService extends Service implements SensorEventListener 
         float x = e.values[0], y = e.values[1], z = e.values[2];
         Uii uii = Uii.get(this);
         uii.raw.add(t, x, y, z);
+        FeatureWindower.Row row = windower.add(t, x, y, z);
+        if (row != null) {
+            uii.lastFeatures = row.f;
+            detect(row, uii);
+        }
         publish(aggregator.addAccel(t, Math.sqrt(x * x + y * y + z * z)), System.currentTimeMillis());
+    }
+
+    /** A faulty detector must not take the motion service down with it. */
+    private void detect(FeatureWindower.Row row, Uii uii) {
+        try {
+            MotionDetector.Detection d = DetectorHolder.get().onFeatures(
+                    row.tMs, row.f, uii.freshHeartRate(System.currentTimeMillis()));
+            if (d != null) PassiveAlerts.onDetected(this, d, row.tMs);
+        } catch (RuntimeException e) {
+            Log.w("UII", "detector failed: " + e);
+        }
     }
 
     private void publish(List<SampleWindow> windows, long now) {

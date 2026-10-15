@@ -17,6 +17,14 @@
                 <action android:name="net.studev.uii.DEBUG_FALL" />
             </intent-filter>
         </receiver>
+        <!-- Debug builds only: fire or randomise detections to test the passive alert path. -->
+        <receiver
+            android:name=".uii.DebugDetectReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="net.studev.uii.DEBUG_DETECT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

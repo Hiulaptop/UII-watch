@@ -38,6 +38,31 @@ public final class UiiState {
     public long lastFallMs() { return p.getLong("last_fall", 0); }
     public void setLastFallMs(long t) { p.edit().putLong("last_fall", t).apply(); }
 
+    /** When this kind of passive alert last fired. Falls keep their original key so older installs carry over. */
+    public long lastDetectedMs(String type) {
+        return Payloads.FALL.equals(type) ? lastFallMs() : p.getLong("last_det_" + type, 0);
+    }
+
+    public void setLastDetectedMs(String type, long t) {
+        if (Payloads.FALL.equals(type)) setLastFallMs(t);
+        else p.edit().putLong("last_det_" + type, t).apply();
+    }
+
+    /** Forget every kind, so a new detection is reported straight away after the wearer said they were fine. */
+    public void clearLastDetected() {
+        p.edit().putLong("last_fall", 0)
+                .remove("last_det_" + Payloads.SEIZURE)
+                .remove("last_det_" + Payloads.PRE_SEIZURE)
+                .apply();
+    }
+
+    /** The wearer's SOS card as the server last sent it (card JSON), or "" when there is none. */
+    public String sosCardJson() { return p.getString("sos_card", ""); }
+    public void setSosCardJson(String json) { p.edit().putString("sos_card", json).apply(); }
+
+    public long sosCardFetchedMs() { return p.getLong("sos_card_at", 0); }
+    public void setSosCardFetchedMs(long t) { p.edit().putLong("sos_card_at", t).apply(); }
+
     /** Ids of alerts the server refused for good, so the screen does not report them as sent. */
     public boolean isRejected(String id) { return RecentIds.contains(p.getString("rejected", ""), id); }
     public void addRejected(String id) { p.edit().putString("rejected", RecentIds.add(p.getString("rejected", ""), id, 20)).commit(); }

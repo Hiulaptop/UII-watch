@@ -32,6 +32,8 @@ import androidx.wear.compose.material3.ButtonDefaults
 import com.example.watchtest.R
 import com.example.watchtest.uii.FallAlerts
 import com.example.watchtest.uii.Notifications
+import com.example.watchtest.uii.Payloads
+import com.example.watchtest.uii.SosCard
 import com.example.watchtest.uii.Uii
 import kotlinx.coroutines.delay
 
@@ -47,22 +49,25 @@ class FallPromptActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val id = intent.getStringExtra(EXTRA_ID).orEmpty()
         val due = intent.getLongExtra(EXTRA_DUE, 0L)
+        val type = intent.getStringExtra(EXTRA_TYPE) ?: Payloads.FALL
         promptId = id
         promptDue = due
+        promptType = type
         setContent {
             UiiWatchTheme {
-                FallPrompt(id = id, dueMs = due, onClose = { finish() })
+                FallPrompt(id = id, dueMs = due, type = type, onClose = { finish() })
             }
         }
     }
 
     private var promptId = ""
     private var promptDue = 0L
+    private var promptType = Payloads.FALL
 
     /** Leaving the prompt (swipe, screen off) while the window is still open hands over to the notification. */
     override fun onStop() {
         if (promptId.isNotEmpty() && System.currentTimeMillis() < promptDue && StatusSource.isQueued(this, promptId)) {
-            Notifications.showFall(this, promptId)
+            Notifications.showFall(this, promptId, promptType)
         }
         super.onStop()
     }
@@ -70,20 +75,22 @@ class FallPromptActivity : ComponentActivity() {
     companion object {
         const val EXTRA_ID = "outbox_id"
         const val EXTRA_DUE = "due_ms"
+        const val EXTRA_TYPE = "alert_type"
         @JvmStatic
-        fun intent(c: Context, id: String, dueMs: Long): Intent =
-            Intent(c, FallPromptActivity::class.java).putExtra(EXTRA_ID, id).putExtra(EXTRA_DUE, dueMs)
+        fun intent(c: Context, id: String, dueMs: Long, type: String): Intent =
+            Intent(c, FallPromptActivity::class.java).putExtra(EXTRA_ID, id).putExtra(EXTRA_DUE, dueMs).putExtra(EXTRA_TYPE, type)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
     }
 }
 
 @Composable
-private fun FallPrompt(id: String, dueMs: Long, onClose: () -> Unit) {
+private fun FallPrompt(id: String, dueMs: Long, type: String, onClose: () -> Unit) {
     val context = LocalContext.current
     val windowMs = (dueMs - System.currentTimeMillis()).coerceAtLeast(1)
     var remaining by remember { mutableLongStateOf(windowMs) }
     var sent by remember { mutableStateOf(false) }
     var delivery by remember { mutableStateOf(Delivery.WAITING) }
+    var card by remember { mutableStateOf<SosCard?>(null) }
 
     LaunchedEffect(id) {
         // Until the window ends: count down, and close if the alert was cancelled somewhere else (the notification).
@@ -96,11 +103,16 @@ private fun FallPrompt(id: String, dueMs: Long, onClose: () -> Unit) {
         // Then follow delivery exactly like a manual alert: only "sent" once the server accepted it.
         while (StatusSource.isQueued(context, id)) delay(500)
         delivery = StatusSource.delivery(context, id)
-        if (delivery == Delivery.SENT) { delay(2500); onClose() }
+        if (delivery == Delivery.SENT) {
+            // Whoever is next to the wearer may need the medical card; it stays until dismissed. No card: just close.
+            val cached = Uii.get(context).sosCard()
+            if (cached != null) card = cached else { delay(2500); onClose() }
+        }
     }
 
     if (sent) {
-        DeliveryContent(delivery)
+        val shown = card
+        if (shown != null) SosCardScreen(shown, onDone = onClose) else DeliveryContent(delivery)
         return
     }
     Column(
@@ -108,7 +120,8 @@ private fun FallPrompt(id: String, dueMs: Long, onClose: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        Label(stringResource(R.string.fall_question), 18.sp, WatchColors.Primary, bold = true)
+        val question = if (type == Payloads.PRE_SEIZURE) R.string.warn_sit else R.string.fall_question
+        Label(stringResource(question), 18.sp, WatchColors.Primary, bold = true)
         Ring(
             color = WatchColors.Accent,
             progress = (remaining.toFloat() / windowMs).coerceIn(0f, 1f),

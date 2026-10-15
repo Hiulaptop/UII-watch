@@ -38,6 +38,21 @@
     <string name="fall_notification_title">Phát hiện té ngã</string>
     <string name="fall_notification_text">Sẽ báo người thân sau %1$d giây</string>
     <string name="monitoring_notification_title">UII đang theo dõi</string>
+    <string name="warn_sit">Ngồi xuống!</string>
+    <string name="warn_notification_title">Dấu hiệu co giật</string>
+    <string name="warn_notification_text">Hãy ngồi xuống. Sẽ báo người thân sau %1$d giây</string>
+    <string name="seizure_notification_title">Phát hiện co giật</string>
+
+    <!-- Emergency card shown after an alert is sent -->
+    <string name="card_title">Thẻ y tế</string>
+    <string name="card_age">%1$d tuổi</string>
+    <string name="card_blood">Nhóm máu</string>
+    <string name="card_epilepsy">Loại động kinh</string>
+    <string name="card_notes">Ghi chú</string>
+    <string name="card_allergies">Dị ứng</string>
+    <string name="card_conditions">Bệnh nền</string>
+    <string name="card_meds">Thuốc</string>
+    <string name="cd_card">Thông tin y tế của người đeo đồng hồ. Chạm vào số để gọi.</string>
 
     <!-- Pairing -->
     <string name="pairing_busy">Đang ghép…</string>

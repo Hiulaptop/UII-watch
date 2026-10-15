@@ -34,6 +34,7 @@ import androidx.wear.compose.material3.ButtonDefaults
 import com.example.watchtest.R
 import com.example.watchtest.uii.FallAlerts
 import com.example.watchtest.uii.Payloads
+import com.example.watchtest.uii.Uii
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -120,7 +121,7 @@ fun CountdownScreen(kind: SosKind, onCancel: () -> Unit, onFinished: (itemId: St
 
 /** Sent or waiting, decided only by whether the server has accepted the item (it leaves the outbox then). */
 @Composable
-fun DeliveryScreen(itemId: String, onDone: () -> Unit) {
+fun DeliveryScreen(itemId: String, onDone: () -> Unit, onCard: () -> Unit) {
     val context = LocalContext.current
     var state by remember { mutableStateOf(StatusSource.delivery(context, itemId)) }
     LaunchedEffect(itemId) {
@@ -129,7 +130,9 @@ fun DeliveryScreen(itemId: String, onDone: () -> Unit) {
             state = StatusSource.delivery(context, itemId)
         }
         // A refused alert stays on screen: the wearer must know to call someone.
-        if (state == Delivery.SENT) { delay(2500); onDone() }
+        if (state == Delivery.SENT) {
+            if (Uii.get(context).sosCard() != null) onCard() else { delay(2500); onDone() }
+        }
     }
     DeliveryContent(state)
 }

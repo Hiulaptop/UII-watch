@@ -62,23 +62,32 @@ public final class ApiClient implements Api {
         return post("/api/device/alerts", token, json);
     }
 
+    @Override public ApiResult getSosCard(String token) {
+        return request("GET", "/api/device/sos-card", token, null);
+    }
+
     private ApiResult post(String path, String token, String json) {
+        return request("POST", path, token, json);
+    }
+
+    private ApiResult request(String method, String path, String token, String json) {
         HttpURLConnection c = null;
         try {
             c = (HttpURLConnection) new URL(base + path).openConnection();
-            c.setRequestMethod("POST");
+            c.setRequestMethod(method);
             c.setConnectTimeout(connectTimeoutMs);
             c.setReadTimeout(readTimeoutMs);
             c.setInstanceFollowRedirects(false);
-            c.setDoOutput(true);
-            c.setRequestProperty("Content-Type", "application/json");
             c.setRequestProperty("Accept", "application/json");
             if (token != null) c.setRequestProperty("Authorization", "Bearer " + token);
-
-            byte[] body = json.getBytes(StandardCharsets.UTF_8);
-            c.setFixedLengthStreamingMode(body.length);
-            try (OutputStream os = c.getOutputStream()) {
-                os.write(body);
+            if (json != null) {
+                c.setDoOutput(true);
+                c.setRequestProperty("Content-Type", "application/json");
+                byte[] body = json.getBytes(StandardCharsets.UTF_8);
+                c.setFixedLengthStreamingMode(body.length);
+                try (OutputStream os = c.getOutputStream()) {
+                    os.write(body);
+                }
             }
             int status = c.getResponseCode();
             InputStream in = status >= 400 ? c.getErrorStream() : c.getInputStream();

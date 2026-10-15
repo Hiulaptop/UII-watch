@@ -20,6 +20,8 @@ public final class Payloads {
     public static final String PRE_SEIZURE = "pre_seizure";
     public static final String TRIGGER_DEVICE = "device_event";
     public static final String TRIGGER_MANUAL = "manual";
+    /** Raised by the motion detector (model), as opposed to the operating system's own event. */
+    public static final String TRIGGER_ALGORITHM = "algorithm";
 
     private Payloads() {}
 

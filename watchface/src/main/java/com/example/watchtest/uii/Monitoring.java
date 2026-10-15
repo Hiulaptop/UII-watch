@@ -28,6 +28,7 @@ public final class Monitoring {
         if (!uii.secrets.isPaired()) return;
         Notifications.ensureChannels(c);
         PassiveRegistration.register(c);
+        uii.refreshSosCardAsync();
         if (canRunMotionService(c, fromBackground)) {
             try {
                 MotionService.start(c);
