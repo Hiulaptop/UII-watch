@@ -3,6 +3,16 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+// The release version lives here and nowhere else. versionCode must rise with every upload to Google Play, so it is
+// derived: major * 1_000_000 + minor * 10_000 + patch * 100 + build. A second upload of the same version is
+// `-Puii.build=1` (up to 99); 0.0.1 is code 100, 0.1.0 is 10_000, 1.0.0 is 1_000_000.
+val appVersionName = "0.0.1"
+val appBuild = ((project.findProperty("uii.build") as String?) ?: "0").toInt()
+require(appBuild in 0..99) { "uii.build must be between 0 and 99 (got $appBuild)" }
+val appVersionCode = appVersionName.split(".").map { it.toInt() }.let { (major, minor, patch) ->
+    major * 1_000_000 + minor * 10_000 + patch * 100
+} + appBuild
+
 // Debug builds only: point the emulator at a local server (-Puii.apiBaseUrl=http://10.0.2.2:3000) and shorten or lengthen
 // the "I'm fine" window for manual testing (-Puii.fallWindowMs=90000). Release builds ignore both on purpose.
 val debugApiBaseUrl = (project.findProperty("uii.apiBaseUrl") as String?) ?: "https://uii.studev.net"
@@ -38,8 +48,8 @@ android {
         applicationId = "net.studev.uii"
         minSdk = 34
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
     }
 
     buildFeatures {
