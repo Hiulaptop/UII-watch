@@ -76,6 +76,9 @@ in Settings where you can switch them on.
 
 Updating later is `adb install -r` with the same key; the pairing and the queued items survive.
 
+To distribute through Google Play instead, see `docs/play-release.md`. A Play install and an `adb` install are signed
+with different keys and cannot update each other: uninstall one before installing the other, then pair again.
+
 ## 7. Keep monitoring alive
 
 Some watches stop background apps to save battery. Open the watch's battery or app settings and make sure UII is **not**
