@@ -25,6 +25,7 @@ object Routes {
     const val COUNTDOWN = "countdown/{kind}"
     const val DELIVERY = "delivery/{id}"
     const val CARD = "card"
+    const val CONSENT = "consent"
     fun countdown(kind: SosKind) = "countdown/${kind.name}"
     fun delivery(id: String) = "delivery/$id"
 }
@@ -40,7 +41,10 @@ fun UiiApp() {
 
             LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
                 if (Uii.get(context).secrets.isPaired) {
-                    if (!promptedThisProcess && missingPermissions(StatusSource.read(context)).isNotEmpty()) {
+                    if (!Uii.get(context).state.consentAccepted()) {
+                        // Ask before any permission or sensor is touched.
+                        if (nav.currentDestination?.route != Routes.CONSENT) nav.navigate(Routes.CONSENT)
+                    } else if (!promptedThisProcess && missingPermissions(StatusSource.read(context)).isNotEmpty()) {
                         promptedThisProcess = true
                         permissions.auto()
                     } else {
@@ -57,7 +61,10 @@ fun UiiApp() {
                         status = status,
                         onSos = { nav.navigate(Routes.SOS) },
                         onDetails = { nav.navigate(Routes.DETAILS) },
-                        onFixPermission = permissions.fix,
+                        onFixPermission = {
+                            if (Uii.get(context).state.consentAccepted()) permissions.fix()
+                            else nav.navigate(Routes.CONSENT)
+                        },
                         onPair = { nav.navigate(Routes.PAIR) },
                     )
                 }
@@ -65,8 +72,20 @@ fun UiiApp() {
                 composable(Routes.PAIR) {
                     PairScreen(onPaired = {
                         nav.popBackStack(Routes.HOME, inclusive = false)
-                        if (missingPermissions(StatusSource.read(context)).isNotEmpty()) permissions.auto()
+                        if (!Uii.get(context).state.consentAccepted()) nav.navigate(Routes.CONSENT)
+                        else if (missingPermissions(StatusSource.read(context)).isNotEmpty()) permissions.auto()
                     })
+                }
+                composable(Routes.CONSENT) {
+                    ConsentScreen(
+                        onAccept = {
+                            Uii.get(context).state.setConsentAccepted()
+                            nav.popBackStack(Routes.HOME, inclusive = false)
+                            if (missingPermissions(StatusSource.read(context)).isNotEmpty()) permissions.auto()
+                            else Monitoring.start(context)
+                        },
+                        onDecline = { nav.popBackStack(Routes.HOME, inclusive = false) },
+                    )
                 }
                 composable(Routes.SOS) {
                     SosMenuScreen(onPick = { nav.navigate(Routes.countdown(it)) })

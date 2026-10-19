@@ -26,6 +26,11 @@ public final class Monitoring {
     public static void start(Context c, boolean fromBackground) {
         Uii uii = Uii.get(c);
         if (!uii.secrets.isPaired()) return;
+        // Nothing is read from the sensors until the wearer has seen what is collected and agreed.
+        if (!uii.state.consentAccepted()) {
+            uii.state.setMotionStatus("chờ đồng ý");
+            return;
+        }
         Notifications.ensureChannels(c);
         PassiveRegistration.register(c);
         uii.refreshSosCardAsync();

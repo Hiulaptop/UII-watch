@@ -56,6 +56,11 @@ public final class UiiState {
                 .apply();
     }
 
+    /** Version of the consent text the wearer accepted; 0 when none. Raise {@link #CONSENT_VERSION} to ask again. */
+    public static final int CONSENT_VERSION = 1;
+    public boolean consentAccepted() { return p.getInt("consent_v", 0) >= CONSENT_VERSION; }
+    public void setConsentAccepted() { p.edit().putInt("consent_v", CONSENT_VERSION).apply(); }
+
     /** The wearer's SOS card as the server last sent it (card JSON), or "" when there is none. */
     public String sosCardJson() { return p.getString("sos_card", ""); }
     public void setSosCardJson(String json) { p.edit().putString("sos_card", json).apply(); }
