@@ -69,6 +69,12 @@ public final class Payloads {
     /** {@code snapshot} may be null; the alert is worth sending without it. */
     public static String alert(String clientId, String type, String trigger, long detectedAtMs,
                                Double heartRate, Double accelPeak, Double confidence, Snapshot snapshot) {
+        return alert(clientId, type, trigger, detectedAtMs, heartRate, accelPeak, confidence, snapshot, null);
+    }
+
+    /** As above, with where the wearer was. A missing or unusable fix just leaves the position out. */
+    public static String alert(String clientId, String type, String trigger, long detectedAtMs,
+                               Double heartRate, Double accelPeak, Double confidence, Snapshot snapshot, LocationFix fix) {
         try {
             JSONObject o = new JSONObject();
             o.put("client_id", clientId);
@@ -80,6 +86,7 @@ public final class Payloads {
             if (in(heartRate, 20, 250)) metrics.put("heart_rate", round2(heartRate));
             if (in(accelPeak, 0, 400)) metrics.put("accel_peak", round2(accelPeak));
             if (metrics.length() > 0) o.put("metrics", metrics);
+            putFix(o, fix, detectedAtMs);
             if (snapshot != null && snapshot.size() > 0 && snapshot.size() <= MAX_SNAPSHOT_POINTS
                     && snapshot.sampleRateHz >= 1 && snapshot.sampleRateHz <= 200) {
                 JSONObject s = new JSONObject();
@@ -94,6 +101,28 @@ public final class Payloads {
                 s.put("axes", axes);
                 o.put("snapshot", s);
             }
+            return o.toString();
+        } catch (JSONException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static boolean putFix(JSONObject o, LocationFix fix, long nowMs) throws JSONException {
+        if (fix == null || !fix.isValid()) return false;
+        o.put("lat", Math.round(fix.lat * 1e6) / 1e6);
+        o.put("lng", Math.round(fix.lng * 1e6) / 1e6);
+        if (in(fix.accuracyM, 0, 10_000)) o.put("accuracy_m", Math.round(fix.accuracyM * 10.0) / 10.0);
+        o.put("fix_time", fix.timeMs);
+        return true;
+    }
+
+    /** A later position of an alert already sent, found again by its client id. Null when the fix cannot be sent. */
+    public static String location(String clientId, LocationFix fix) {
+        if (clientId == null || fix == null || !fix.isValid()) return null;
+        try {
+            JSONObject o = new JSONObject();
+            o.put("client_id", clientId);
+            putFix(o, fix, 0);
             return o.toString();
         } catch (JSONException e) {
             throw new IllegalStateException(e);

@@ -14,6 +14,11 @@
     <!-- Heart rate on Wear OS 5 and older; Wear OS 6 uses READ_HEART_RATE below instead. -->
     <uses-permission android:name="android.permission.BODY_SENSORS" android:maxSdkVersion="35" />
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <!-- Where the wearer is, read only around an SOS (never continuously). Optional: the app works without them.
+         Background location lets a fall detected while the app is closed still report where it happened. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <!-- Health Services checks this for passive monitoring and fall events. -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 

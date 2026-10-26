@@ -39,6 +39,8 @@ public class UploaderTest {
         @Override public ApiResult postSamples(String token, String json) { return answer("S:" + json); }
         @Override public ApiResult postAlert(String token, String json) { return answer("A:" + json); }
         @Override public ApiResult getSosCard(String token) { return answer("C"); }
+        @Override public ApiResult unpair(String token) { return answer("U"); }
+        @Override public ApiResult postAlertLocation(String token, String json) { return answer("L:" + json); }
     }
 
     private FileOutbox box() throws Exception { return new FileOutbox(tmp.newFolder()); }

@@ -61,6 +61,10 @@ public final class UiiState {
     public boolean consentAccepted() { return p.getInt("consent_v", 0) >= CONSENT_VERSION; }
     public void setConsentAccepted() { p.edit().putInt("consent_v", CONSENT_VERSION).apply(); }
 
+    /** The wearer's answer to the optional location question: 0 not asked yet, 1 allowed, 2 declined. */
+    public int locationChoice() { return p.getInt("location_choice", 0); }
+    public void setLocationChoice(int v) { p.edit().putInt("location_choice", v).apply(); }
+
     /** The wearer's SOS card as the server last sent it (card JSON), or "" when there is none. */
     public String sosCardJson() { return p.getString("sos_card", ""); }
     public void setSosCardJson(String json) { p.edit().putString("sos_card", json).apply(); }
@@ -71,6 +75,15 @@ public final class UiiState {
     /** Ids of alerts the server refused for good, so the screen does not report them as sent. */
     public boolean isRejected(String id) { return RecentIds.contains(p.getString("rejected", ""), id); }
     public void addRejected(String id) { p.edit().putString("rejected", RecentIds.add(p.getString("rejected", ""), id, 20)).commit(); }
+
+    /** Forget everything tied to the account this watch was paired with. Consent stays: it is about this app, not the account. */
+    public void resetPairing() {
+        p.edit().putBoolean("pairing_revoked", false).putBoolean("permission_lost", false)
+                .putString("sos_card", "").putLong("sos_card_at", 0)
+                .putString("rejected", "").putString("motion", "tắt")
+                .apply();
+        clearLastDetected();
+    }
 
     public boolean permissionLost() { return p.getBoolean("permission_lost", false); }
     public void setPermissionLost(boolean v) { p.edit().putBoolean("permission_lost", v).apply(); }

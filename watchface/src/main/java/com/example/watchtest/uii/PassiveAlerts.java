@@ -27,11 +27,17 @@ public final class PassiveAlerts {
         uii.state.setLastDetectedMs(type, now);
 
         long detectedAt = Math.min(eventTimeMs > 0 ? eventTimeMs : now, now);
+        // The cancel window is idle time for a GPS that starts cold: the reading begins now, and what it finds goes to the
+        // server as an update to this alert. The alert itself carries only a cached position, and is never held for it.
+        uii.location.begin();
+        LocationFix fix = uii.location.bestFix();
+        String clientId = Payloads.newClientId();
         String json = Payloads.alert(
-                Payloads.newClientId(), type, trigger, detectedAt,
-                uii.freshHeartRate(now), null, confidence, uii.raw.snapshot(now, 10_000, 50));
+                clientId, type, trigger, detectedAt,
+                uii.freshHeartRate(now), null, confidence, uii.raw.snapshot(now, 10_000, 50), fix);
         long due = now + Uii.FALL_CANCEL_WINDOW_MS;
         Outbox.Item item = uii.outbox.add(Outbox.Kind.ALERT, json, due);
+        uii.location.bind(clientId, due, fix);
         // Wear OS does not honour full-screen intents, so the "are you fine?" screen can only take over when the app
         // is already in front. Then it is the only thing shown: a notification on top would cover its button with the
         // system alert chip. Otherwise the notification is what the wearer sees (and the prompt posts it if it is left).

@@ -4,7 +4,7 @@ import java.util.List;
 
 /** Requests waiting to be sent. Persisted, so an alert survives a lost connection or a killed process. */
 public interface Outbox {
-    enum Kind { ALERT, SAMPLES }
+    enum Kind { ALERT, SAMPLES, LOCATION }
 
     final class Item {
         public final String id;

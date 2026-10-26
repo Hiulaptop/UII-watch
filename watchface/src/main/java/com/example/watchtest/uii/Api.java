@@ -10,4 +10,10 @@ public interface Api {
 
     /** The reduced SOS profile shown on the watch after an alert (see the web app's lib/sos/watch-card.ts). */
     ApiResult getSosCard(String token);
+
+    /** A later position of an alert that was already sent (see {@link Payloads#location}). */
+    ApiResult postAlertLocation(String token, String json);
+
+    /** Tells the server this watch is being disconnected, so it leaves the account's device list. */
+    ApiResult unpair(String token);
 }

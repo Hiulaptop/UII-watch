@@ -30,6 +30,8 @@ data class StatusInput(
     val heartRate: Int? = null,
     /** Null when Health Services has not reported yet. */
     val fallSupported: Boolean? = null,
+    /** Position can be read around an SOS (optional: it never changes the Home state). */
+    val locationGranted: Boolean = false,
     val versionName: String = "",
     val serverHost: String = "",
     val lastUploadTime: String = "",

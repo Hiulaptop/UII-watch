@@ -1,5 +1,6 @@
 package com.example.watchtest.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -143,7 +145,7 @@ private fun RefusedScreen(onPair: () -> Unit) {
 }
 
 @Composable
-fun DetailsScreen(status: StatusInput) {
+fun DetailsScreen(status: StatusInput, onUnpair: () -> Unit, onLocation: () -> Unit) {
     val listState = rememberTransformingLazyColumnState()
     ScreenScaffold(scrollState = listState) { padding ->
         TransformingLazyColumn(
@@ -174,11 +176,31 @@ fun DetailsScreen(status: StatusInput) {
                 }
             }
             item {
+                val colors = LocalStatusColors.current
+                val name = stringResource(R.string.row_location)
+                StatusRow(
+                    glyph = if (status.locationGranted) R.drawable.ic_check else R.drawable.ic_alert,
+                    tint = if (status.locationGranted) colors.ok else colors.warn,
+                    text = name,
+                    description = stringResource(if (status.locationGranted) R.string.cd_row_ok else R.string.cd_row_warn, name),
+                    modifier = Modifier.fillMaxWidth(0.82f).then(
+                        if (status.locationGranted) Modifier else Modifier.clickable(role = Role.Button, onClick = onLocation),
+                    ),
+                )
+            }
+            item {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 6.dp)) {
                     Label(stringResource(R.string.details_footer, status.versionName, status.serverHost), 11.sp, WatchColors.Secondary)
                     if (status.queued > 0) Label(stringResource(R.string.details_queue, status.queued), 11.sp, WatchColors.Secondary)
                     if (status.lastUploadTime.isNotEmpty()) Label(status.lastUploadTime + " · " + status.lastUploadState, 10.sp, WatchColors.Secondary)
                 }
+            }
+            item {
+                Button(
+                    onClick = onUnpair,
+                    modifier = Modifier.fillMaxWidth(0.8f).padding(top = 6.dp, bottom = 8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = WatchColors.Surface, contentColor = WatchColors.Primary),
+                ) { Label(stringResource(R.string.unpair_button), 15.sp, WatchColors.Primary, modifier = Modifier.fillMaxWidth()) }
             }
         }
     }

@@ -62,8 +62,16 @@ public final class ApiClient implements Api {
         return post("/api/device/alerts", token, json);
     }
 
+    @Override public ApiResult postAlertLocation(String token, String json) {
+        return post("/api/device/alerts/location", token, json);
+    }
+
     @Override public ApiResult getSosCard(String token) {
         return request("GET", "/api/device/sos-card", token, null);
+    }
+
+    @Override public ApiResult unpair(String token) {
+        return post("/api/device/unpair", token, "{}");
     }
 
     private ApiResult post(String path, String token, String json) {

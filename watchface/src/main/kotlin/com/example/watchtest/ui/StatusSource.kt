@@ -52,6 +52,7 @@ object StatusSource {
             uploadBlocked = s.lastUploadState().startsWith("RETRY_LATER"),
             networkAvailable = hasInternet(c),
             heartRate = hr,
+            locationGranted = granted(c, Manifest.permission.ACCESS_FINE_LOCATION) && granted(c, Manifest.permission.ACCESS_BACKGROUND_LOCATION),
             fallSupported = when (s.fallSupport()) { 1 -> true; 0 -> false; else -> null },
             versionName = BuildConfig.VERSION_NAME,
             serverHost = Uri.parse(BuildConfig.API_BASE_URL).host ?: "",

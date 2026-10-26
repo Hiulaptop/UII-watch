@@ -26,6 +26,8 @@ object Routes {
     const val DELIVERY = "delivery/{id}"
     const val CARD = "card"
     const val CONSENT = "consent"
+    const val UNPAIR = "unpair"
+    const val LOCATION = "location"
     fun countdown(kind: SosKind) = "countdown/${kind.name}"
     fun delivery(id: String) = "delivery/$id"
 }
@@ -49,6 +51,11 @@ fun UiiApp() {
                         permissions.auto()
                     } else {
                         Monitoring.start(context)
+                        // Optional and asked once: where the wearer is is read only around an SOS.
+                        if (missingPermissions(StatusSource.read(context)).isEmpty() &&
+                            Uii.get(context).state.locationChoice() == 0 &&
+                            nav.currentDestination?.route != Routes.LOCATION
+                        ) nav.navigate(Routes.LOCATION)
                     }
                 } else {
                     promptedThisProcess = false
@@ -68,7 +75,16 @@ fun UiiApp() {
                         onPair = { nav.navigate(Routes.PAIR) },
                     )
                 }
-                composable(Routes.DETAILS) { DetailsScreen(status) }
+                composable(Routes.DETAILS) {
+                    DetailsScreen(status, onUnpair = { nav.navigate(Routes.UNPAIR) }, onLocation = { nav.navigate(Routes.LOCATION) })
+                }
+                composable(Routes.LOCATION) { LocationScreen(onDone = { nav.popBackStack(Routes.HOME, inclusive = false) }) }
+                composable(Routes.UNPAIR) {
+                    UnpairScreen(
+                        onCancel = { nav.popBackStack() },
+                        onDone = { nav.popBackStack(Routes.HOME, inclusive = false) },
+                    )
+                }
                 composable(Routes.PAIR) {
                     PairScreen(onPaired = {
                         nav.popBackStack(Routes.HOME, inclusive = false)

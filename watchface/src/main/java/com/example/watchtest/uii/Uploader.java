@@ -56,6 +56,7 @@ public final class Uploader {
         List<Outbox.Item> ordered = new ArrayList<>();
         List<Outbox.Item> all = outbox.list();
         for (Outbox.Item i : all) if (i.kind == Outbox.Kind.ALERT) ordered.add(i);
+        for (Outbox.Item i : all) if (i.kind == Outbox.Kind.LOCATION) ordered.add(i);
         for (Outbox.Item i : all) if (i.kind == Outbox.Kind.SAMPLES) ordered.add(i);
 
         int sent = 0;
@@ -66,7 +67,12 @@ public final class Uploader {
                 nextDue = nextDue == 0 ? item.notBeforeMs : Math.min(nextDue, item.notBeforeMs);
                 continue;
             }
-            ApiResult r = item.kind == Outbox.Kind.ALERT ? api.postAlert(token, item.json) : api.postSamples(token, item.json);
+            ApiResult r;
+            switch (item.kind) {
+                case ALERT: r = api.postAlert(token, item.json); break;
+                case LOCATION: r = api.postAlertLocation(token, item.json); break;
+                default: r = api.postSamples(token, item.json);
+            }
             switch (r.outcome) {
                 case OK:
                     outbox.remove(item.id);

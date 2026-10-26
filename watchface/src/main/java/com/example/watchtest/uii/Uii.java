@@ -25,6 +25,7 @@ public final class Uii {
     public final SampleSink sampleSink;
     public final RawBuffer raw = new RawBuffer(600);
     public final UiiState state;
+    public final LocationTracker location;
 
     private volatile double lastHr = Double.NaN;
     private volatile long lastHrMs;
@@ -44,6 +45,7 @@ public final class Uii {
         uploader = new Uploader(outbox, api, secrets);
         sampleSink = new SampleSink(outbox);
         state = new UiiState(app);
+        location = new LocationTracker(app, outbox);
         uploader.setDropListener(item -> state.addRejected(item.id));
     }
 
@@ -56,6 +58,21 @@ public final class Uii {
             }
         }
         return i;
+    }
+
+    /**
+     * Disconnects this watch. The server is told first (best effort: with no network the watch still disconnects, and
+     * the wearer can remove it from the web later), then monitoring stops and everything tied to the pairing is
+     * dropped, including alerts not yet sent. Blocks on the network: call it off the main thread.
+     */
+    public void unpair() {
+        String token = secrets.token();
+        if (token != null) api.unpair(token);
+        Monitoring.stop(app);
+        location.cancel();
+        for (Outbox.Item item : outbox.list()) outbox.remove(item.id);
+        secrets.clear();
+        state.resetPairing();
     }
 
     /**

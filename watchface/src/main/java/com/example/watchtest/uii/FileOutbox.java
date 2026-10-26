@@ -90,7 +90,7 @@ public final class FileOutbox implements Outbox {
 
     private File fileFor(Item item) {
         // Sorted by creation time; the kind letter and id keep names unique and let remove() find the file.
-        return new File(dir, String.format(Locale.ROOT, "%013d-%s-%s.json", item.createdAtMs, item.kind == Kind.ALERT ? "A" : "S", item.id));
+        return new File(dir, String.format(Locale.ROOT, "%013d-%s-%s.json", item.createdAtMs, item.kind == Kind.ALERT ? "A" : item.kind == Kind.LOCATION ? "L" : "S", item.id));
     }
 
     private void trimSamples() {

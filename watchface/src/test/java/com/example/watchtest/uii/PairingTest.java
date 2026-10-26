@@ -23,6 +23,8 @@ public class PairingTest {
             @Override public ApiResult postSamples(String token, String json) { throw new AssertionError(); }
             @Override public ApiResult postAlert(String token, String json) { throw new AssertionError(); }
             @Override public ApiResult getSosCard(String token) { throw new AssertionError(); }
+            @Override public ApiResult unpair(String token) { throw new AssertionError(); }
+            @Override public ApiResult postAlertLocation(String token, String json) { throw new AssertionError(); }
         };
     }
 
@@ -52,6 +54,8 @@ public class PairingTest {
             @Override public ApiResult postSamples(String t, String j) { throw new AssertionError(); }
             @Override public ApiResult postAlert(String t, String j) { throw new AssertionError(); }
             @Override public ApiResult getSosCard(String t) { throw new AssertionError(); }
+            @Override public ApiResult unpair(String t) { throw new AssertionError(); }
+            @Override public ApiResult postAlertLocation(String t, String j) { throw new AssertionError(); }
         };
         assertEquals(Pairing.Result.INVALID_CODE, Pairing.pair(api, new Store(), "123", "n", "m"));
     }

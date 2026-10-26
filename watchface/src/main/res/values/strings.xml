@@ -62,6 +62,21 @@
     <string name="card_meds">Thuốc</string>
     <string name="cd_card">Thông tin y tế của người đeo đồng hồ. Chạm vào số để gọi.</string>
 
+    <!-- Location around an SOS -->
+    <string name="row_location">Vị trí</string>
+    <string name="location_title">Vị trí khi SOS</string>
+    <string name="location_body">UII đọc vị trí đồng hồ vài lần trong vài phút sau mỗi SOS và gửi kèm cho người thân. Không đọc vào lúc khác.</string>
+    <string name="location_allow">Cho phép</string>
+    <string name="location_decline">Không</string>
+
+    <!-- Disconnect -->
+    <string name="unpair_button">Ngắt kết nối</string>
+    <string name="unpair_title">Ngắt kết nối?</string>
+    <string name="unpair_body">Đồng hồ sẽ không còn báo động cho người thân cho đến khi ghép nối lại.</string>
+    <string name="unpair_queue">%1$d mục chưa gửi sẽ bị xóa.</string>
+    <string name="unpair_confirm">Ngắt</string>
+    <string name="unpair_busy">Đang ngắt…</string>
+
     <!-- Pairing -->
     <string name="pairing_busy">Đang ghép…</string>
     <string name="pair_need_eight">Cần 8 số</string>

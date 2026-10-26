@@ -78,17 +78,27 @@ fun CountdownScreen(kind: SosKind, onCancel: () -> Unit, onFinished: (itemId: St
     var seconds by remember { mutableIntStateOf(secondsLeft(COUNTDOWN_MS)) }
 
     LaunchedEffect(kind) {
-        // The ring and the number come from the same clock, so they never disagree.
-        val start = System.currentTimeMillis()
-        val ticker = launch {
-            while (true) {
-                seconds = secondsLeft(COUNTDOWN_MS - (System.currentTimeMillis() - start))
-                delay(100)
+        // The five seconds are idle time for a GPS that starts cold; the alert itself never waits for it.
+        val location = Uii.get(context).location
+        location.begin()
+        var sending = false
+        try {
+            // The ring and the number come from the same clock, so they never disagree.
+            val start = System.currentTimeMillis()
+            val ticker = launch {
+                while (true) {
+                    seconds = secondsLeft(COUNTDOWN_MS - (System.currentTimeMillis() - start))
+                    delay(100)
+                }
             }
+            progress.animateTo(0f, tween(COUNTDOWN_MS.toInt(), easing = LinearEasing))
+            ticker.cancel()
+            sending = true
+            onFinished(FallAlerts.sendManual(context, kind.payloadType))
+        } finally {
+            // Cancelled or swiped away before the alert was sent: stop reading.
+            if (!sending) location.cancel()
         }
-        progress.animateTo(0f, tween(COUNTDOWN_MS.toInt(), easing = LinearEasing))
-        ticker.cancel()
-        onFinished(FallAlerts.sendManual(context, kind.payloadType))
     }
 
     Box(Modifier.fillMaxSize()) {
